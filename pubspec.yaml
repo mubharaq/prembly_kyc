@@ -1,0 +1,22 @@
+name: prembly_kyc
+description: A Flutter widget for Prembly/IdentityPass KYC verification. Presents a draggable bottom sheet with an embedded WebView for seamless identity verification.
+version: 0.1.0+1
+homepage: https://github.com/mubharaq/prembly_kyc
+repository: https://github.com/mubharaq/prembly_kyc
+issue_tracker: https://github.com/mubharaq/prembly_kyc/issues
+
+environment:
+  sdk: ^3.9.0
+  flutter: ^3.35.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_inappwebview: ^6.1.5
+  permission_handler: ^12.0.1  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  very_good_analysis: ^10.0.0
