@@ -19,11 +19,12 @@
 ///
 /// await PremblyKyc(
 ///   config: PremblyConfig(
-///     merchantKey: 'your_merchant_key',
+///     widgetId: 'your_widget_id',
+///     widgetKey: 'your_widget_key',
 ///     email: 'user@example.com',
 ///     firstName: 'John',
 ///     lastName: 'Doe',
-///     userRef: 'unique_user_ref',
+///     metadata: {'key': 'value'},
 ///   ),
 ///   onSuccess: (response) {
 ///     print('Verified via ${response.channel}');
@@ -44,6 +45,8 @@
 /// ```xml
 /// <uses-permission android:name="android.permission.INTERNET" />
 /// <uses-permission android:name="android.permission.CAMERA" />
+/// <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+/// <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 /// ```
 ///
 /// ### iOS (Info.plist)
@@ -51,6 +54,8 @@
 /// ```xml
 /// <key>NSCameraUsageDescription</key>
 /// <string>Camera access is required for identity verification</string>
+/// <key>NSLocationWhenInUseUsageDescription</key>
+/// <string>Location access is required for identity verification</string>
 /// ```
 library;
 

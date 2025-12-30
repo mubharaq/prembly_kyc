@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 /// Represents a successful verification response from Prembly.
 @immutable
 class PremblyResponse {
-  /// Creates a new [PremblyResponse] instance.
+  ///
   const PremblyResponse({
     required this.status,
     required this.code,
@@ -52,12 +52,12 @@ class PremblyResponse {
 
   /// Converts this response to a JSON map.
   Map<String, dynamic> toJson() => {
-        'status': status,
-        'code': code,
-        'message': message,
-        'channel': channel,
-        if (data != null) 'data': data,
-      };
+    'status': status,
+    'code': code,
+    'message': message,
+    'channel': channel,
+    if (data != null) 'data': data,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -72,15 +72,16 @@ class PremblyResponse {
 
   @override
   int get hashCode => Object.hash(
-        status,
-        code,
-        message,
-        channel,
-        data,
-      );
+    status,
+    code,
+    message,
+    channel,
+    data,
+  );
 
   @override
-  String toString() => 'PremblyResponse('
+  String toString() =>
+      'PremblyResponse('
       'status: $status, '
       'code: $code, '
       'message: $message, '

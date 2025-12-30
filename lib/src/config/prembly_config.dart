@@ -6,15 +6,7 @@ import 'package:flutter/foundation.dart';
 /// the Prembly IdentityPass verification widget.
 @immutable
 class PremblyConfig {
-  /// Creates a new [PremblyConfig] instance.
-  ///
-  /// [widgetId] is your Prembly widget ID from the dashboard.
-  /// [widgetKey] is your Prembly widget key (format: wdgt_xxx...).
-  /// [firstName] is the user's first name.
-  /// [lastName] is the user's last name.
-  /// [email] is the user's email address.
-  /// [phone] is the user's phone number (optional).
-  /// [metadata] is optional additional data to include with the request.
+  /// Creates a new [PremblyConfig] instance with the required parameters.
   const PremblyConfig({
     required this.widgetId,
     required this.widgetKey,
@@ -27,12 +19,12 @@ class PremblyConfig {
 
   /// Your Prembly widget ID.
   ///
-  /// Obtain this from your Prembly dashboard.
+  /// Obtain this from your Prembly widget configuration.
   final String widgetId;
 
   /// Your Prembly widget key.
   ///
-  /// Obtain this from your Prembly dashboard settings.
+  /// Obtain this from your Prembly widget configuration.
   /// Format: wdgt_xxx...
   final String widgetKey;
 

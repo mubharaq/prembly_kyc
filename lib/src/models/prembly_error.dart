@@ -36,7 +36,7 @@ enum PremblyErrorType {
 /// Represents an error that occurred during the Prembly verification process.
 @immutable
 class PremblyError implements Exception {
-  /// Creates a new [PremblyError] instance.
+  ///
   const PremblyError({
     required this.type,
     required this.message,
@@ -97,7 +97,7 @@ class PremblyError implements Exception {
     details: {'error': details},
   );
 
-  /// Creates a verification failed error.
+  /// Creates a verification failure error.
   factory PremblyError.verificationError(String details) => PremblyError(
     type: PremblyErrorType.verificationFailed,
     message: 'Verification Request Failed - Invalid details provided',

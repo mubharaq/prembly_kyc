@@ -21,7 +21,7 @@ class PermissionDenied extends PermissionResult {
   final PremblyError error;
 }
 
-/// Handles camera permission requests for the KYC verification.
+/// Handles permission requests for the KYC verification.
 abstract final class PermissionHelper {
   /// Requests camera permission and returns the result.
   ///

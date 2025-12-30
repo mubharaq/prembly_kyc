@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:prembly_kyc/prembly_kyc.dart';
 
 void main() {
@@ -33,13 +32,6 @@ class _MyHomePageState extends State<MyHomePage> {
   PremblyResponse? _lastResponse;
 
   Future<void> _startVerification() async {
-    var status = await Permission.camera.request();
-    if (status.isDenied) {
-      setState(() {
-        _result = 'Camera permission required';
-      });
-      return;
-    }
     setState(() {
       _isLoading = true;
       _result = null;

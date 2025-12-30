@@ -26,12 +26,12 @@ typedef PremblyCloseCallback = void Function();
 /// ```dart
 /// await PremblyKyc(
 ///   config: PremblyConfig(
-///     merchantKey: 'your_merchant_key',
-///     configId: 'your_widget_config_id',
+///     widgetId: 'your_widget_id',
+///     widgetKey: 'your_widget_key',
 ///     email: 'user@example.com',
 ///     firstName: 'John',
 ///     lastName: 'Doe',
-///     userRef: 'unique_user_ref',
+///     metadata: {'key': 'value'},
 ///   ),
 ///   onSuccess: (response) {
 ///     print('Verified: ${response.channel}');

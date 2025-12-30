@@ -177,7 +177,7 @@ class _PremblyWebViewState extends State<PremblyWebView> {
         );
       },
       onPermissionRequest: (controller, request) async {
-        // Grant camera/microphone permissions
+        // Grant camera/location/microphone permissions
         return PermissionResponse(
           resources: request.resources,
           action: PermissionResponseAction.GRANT,
@@ -216,7 +216,8 @@ class _PremblyWebViewState extends State<PremblyWebView> {
         if (kDebugMode) {
           print('PremblyKYC Console: ${consoleMessage.message}');
         }
-        // Everything below is a hack because prembly's sdk does not fire callbacks
+        // Everything below is a hack because prembly's sdk does not fire
+        // callbacks
 
         //Detect successful verification from SDK logs
         if (msg.contains('Selfie verification result: true') ||
