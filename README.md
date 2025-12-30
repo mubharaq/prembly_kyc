@@ -60,8 +60,7 @@ Add the following to your `ios/Runner/Info.plist`:
 Before using this package, you need to:
 
 1. Create an account on [Prembly Dashboard](https://dashboard.prembly.com)
-2. Create a widget configuration and get your `config_id`
-3. Get your API key (`x-api-key`) from the dashboard
+2. Create a widget and get your `widgetId` and `widgetKey`
 
 ## Usage
 
@@ -75,8 +74,8 @@ ElevatedButton(
   onPressed: () async {
     await PremblyKyc(
       config: PremblyConfig(
-        merchantKey: 'your_api_key',
-        configId: 'your_widget_config_id',
+        widgetId: 'your_widget_id',
+        widgetKey: 'wdgt_your_widget_key',
         email: 'user@example.com',
         firstName: 'John',
         lastName: 'Doe',
@@ -108,15 +107,15 @@ You can include additional metadata with the verification:
 ```dart
 PremblyKyc(
   config: PremblyConfig(
-    merchantKey: 'your_api_key',
-    configId: 'your_widget_config_id',
-    email: 'user@example.com',
+    widgetId: 'your_widget_id',
+    widgetKey: 'wdgt_your_widget_key',
     firstName: 'John',
     lastName: 'Doe',
-    userRef: 'unique_user_123',
-    extraMetadata: {
-      'account_id': 'ACC123',
-      'tier': 'premium',
+    email: 'user@example.com',
+    metadata: {
+      'user_id': 'user_123',
+      'source': 'mobile_app',
+      'custom_field': 'your_value',
     },
   ),
   // ...callbacks
@@ -129,13 +128,13 @@ PremblyKyc(
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `merchantKey` | `String` | Yes | Your Prembly API key (x-api-key) |
-| `configId` | `String` | Yes | Widget configuration ID from dashboard |
+| `widgetId` | `String` | Yes | Your Prembly widget ID |
+| `widgetKey` | `String` | Yes | Your Prembly widget key (format: wdgt_xxx...) |
 | `email` | `String` | Yes | User's email address |
 | `firstName` | `String` | Yes | User's first name |
 | `lastName` | `String` | Yes | User's last name |
 | `userRef` | `String` | Yes | Unique reference for the user |
-| `extraMetadata` | `Map<String, dynamic>?` | No | Additional data to include |
+| `metadata` | `Map<String, dynamic>?` | No | Additional data to include |
 
 ### PremblyResponse
 
@@ -167,6 +166,7 @@ Returned on errors:
 enum PremblyErrorType {
   cameraPermissionDenied,
   cameraPermissionPermanentlyDenied,
+  locationPermissionDenied,
   initializationFailed,
   cancelled,
   verificationFailed,
@@ -216,6 +216,14 @@ onError: (error) {
   }
 },
 ```
+
+## Closing the Widget
+
+Users can close the verification widget via:
+- The X button in the Prembly widget (if redirect URL is configured in dashboard)
+- Dragging down on the handle
+- The "Cancel" button at the bottom
+- System back button/gesture
 
 ## Webhook Integration
 

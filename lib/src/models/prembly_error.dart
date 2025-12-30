@@ -8,6 +8,12 @@ enum PremblyErrorType {
   /// Camera permission is permanently denied (user must enable in settings).
   cameraPermissionPermanentlyDenied,
 
+  /// Location permission was denied by the user.
+  locationPermissionDenied,
+
+  /// Location permission is permanently denied (user must enable in settings).
+  locationPermissionPermanentlyDenied,
+
   /// Widget initialization failed.
   initializationFailed,
 
@@ -57,6 +63,12 @@ class PremblyError implements Exception {
     message: 'Camera permission is required for identity verification',
   );
 
+  /// Creates a location permission denied error.
+  factory PremblyError.locationPermissionDenied() => const PremblyError(
+    type: PremblyErrorType.locationPermissionDenied,
+    message: 'Location permission is required for identity verification',
+  );
+
   /// Creates a camera permission permanently denied error.
   factory PremblyError.cameraPermissionPermanentlyDenied() => const PremblyError(
     type: PremblyErrorType.cameraPermissionPermanentlyDenied,
@@ -82,6 +94,13 @@ class PremblyError implements Exception {
   factory PremblyError.networkError(String details) => PremblyError(
     type: PremblyErrorType.networkError,
     message: 'Network error occurred',
+    details: {'error': details},
+  );
+
+  /// Creates a verification failed error.
+  factory PremblyError.verificationError(String details) => PremblyError(
+    type: PremblyErrorType.verificationFailed,
+    message: 'Verification Request Failed - Invalid details provided',
     details: {'error': details},
   );
 

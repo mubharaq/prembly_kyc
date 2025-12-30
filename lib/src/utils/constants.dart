@@ -8,7 +8,8 @@ const String jsHandlerName = 'PremblyKycHandler';
 const String premblyApiBaseUrl = 'https://api.prembly.com';
 
 /// Base URL for the SDK view.
-const String premblySdkViewBaseUrl = 'https://sdk-view.prembly.com';
+const String premblyWidgetSdkUrl =
+    'https://js.prembly.com/v1/inline/widget-v3.js';
 
 /// Animation duration for the bottom sheet.
 const Duration sheetAnimationDuration = Duration(milliseconds: 350);

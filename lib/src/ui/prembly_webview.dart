@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:prembly_kyc/src/models/prembly_error.dart';
-import 'package:prembly_kyc/src/models/prembly_response.dart';
+import 'package:prembly_kyc/prembly_kyc.dart';
 import 'package:prembly_kyc/src/utils/constants.dart';
 import 'package:prembly_kyc/src/utils/html_template.dart';
 
@@ -19,15 +18,15 @@ typedef OnVerificationCancelled = void Function();
 class PremblyWebView extends StatefulWidget {
   /// Creates a new [PremblyWebView] instance.
   const PremblyWebView({
-    required this.widgetId,
+    required this.config,
     required this.onSuccess,
     required this.onError,
     required this.onCancelled,
     super.key,
   });
 
-  /// The widget ID returned from the initialization API.
-  final String widgetId;
+  /// The Prembly configuration.
+  final PremblyConfig config;
 
   /// Called when verification succeeds.
   final OnVerificationSuccess onSuccess;
@@ -45,12 +44,40 @@ class PremblyWebView extends StatefulWidget {
 class _PremblyWebViewState extends State<PremblyWebView> {
   InAppWebViewController? _controller;
   bool _isDisposed = false;
+  bool _verificationPassed = false;
+  bool _callbackFired = false;
 
   @override
   void dispose() {
     _isDisposed = true;
     _controller?.dispose();
     super.dispose();
+  }
+
+  void _fireSuccess() {
+    if (_callbackFired || _isDisposed) return;
+    _callbackFired = true;
+
+    widget.onSuccess(
+      const PremblyResponse(
+        status: 'success',
+        code: '00',
+        message: 'Verification completed successfully',
+        channel: 'selfie',
+      ),
+    );
+  }
+
+  void _fireError(String message) {
+    if (_callbackFired || _isDisposed) return;
+    _callbackFired = true;
+
+    widget.onError(
+      PremblyError(
+        type: PremblyErrorType.verificationFailed,
+        message: message,
+      ),
+    );
   }
 
   void _handleMessage(Map<String, dynamic> message) {
@@ -106,7 +133,7 @@ class _PremblyWebViewState extends State<PremblyWebView> {
 
   @override
   Widget build(BuildContext context) {
-    final htmlContent = generatePremblyHtml(widget.widgetId);
+    final htmlContent = generatePremblyHtml(widget.config);
 
     return InAppWebView(
       initialData: InAppWebViewInitialData(
@@ -114,8 +141,16 @@ class _PremblyWebViewState extends State<PremblyWebView> {
         encoding: 'utf-8',
         baseUrl: WebUri('https://prembly.com'),
       ),
+      onGeolocationPermissionsShowPrompt: (controller, origin) async {
+        return GeolocationPermissionShowPromptResponse(
+          origin: origin,
+          allow: true,
+          retain: true,
+        );
+      },
       initialSettings: InAppWebViewSettings(
         // General settings
+        javaScriptCanOpenWindowsAutomatically: true,
         useShouldOverrideUrlLoading: true,
         mediaPlaybackRequiresUserGesture: false,
         allowsInlineMediaPlayback: true,
@@ -149,13 +184,19 @@ class _PremblyWebViewState extends State<PremblyWebView> {
         );
       },
       onLoadStop: (controller, url) {
-        // Page finished loading
         if (kDebugMode) {
           print('PremblyKYC: Page loaded - $url');
         }
       },
-      onReceivedError: (_, _, error) {
+      onReceivedError: (_, request, error) {
         if (_isDisposed) return;
+        if (request.url.toString().contains('sessions/verify')) {
+          widget.onError(
+            PremblyError.verificationError(
+              'Verification Request Failed (${error.type}) - ${error.description}',
+            ),
+          );
+        }
         widget.onError(
           PremblyError.webViewError(
             'WebView error (${error.type}) - ${error.description}',
@@ -165,17 +206,52 @@ class _PremblyWebViewState extends State<PremblyWebView> {
       onReceivedHttpError: (_, _, response) {
         if (_isDisposed) return;
         widget.onError(
-          PremblyError.networkError('HTTP ${response.statusCode}'),
+          PremblyError.verificationError(
+            'Verification Request Failed (${response.statusCode})',
+          ),
         );
       },
       onConsoleMessage: (_, consoleMessage) {
+        final msg = consoleMessage.message;
         if (kDebugMode) {
           print('PremblyKYC Console: ${consoleMessage.message}');
+        }
+        // Everything below is a hack because prembly's sdk does not fire callbacks
+
+        //Detect successful verification from SDK logs
+        if (msg.contains('Selfie verification result: true') ||
+            msg.contains('Verification completed successfully')) {
+          _verificationPassed = true;
+          if (kDebugMode) {
+            print('PremblyKYC: Verification passed detected');
+          }
+        }
+
+        // Detect failed verification
+        if (msg.contains('Selfie verification result: false') ||
+            msg.contains('Verification failed')) {
+          if (kDebugMode) {
+            print('PremblyKYC: Verification failed detected');
+          }
+          _fireError('Verification failed');
+        }
+
+        // When verification passed and user clicks Done button
+        if (_verificationPassed && msg.contains('button_clicked')) {
+          if (kDebugMode) {
+            print('PremblyKYC: Done button clicked after success');
+          }
+          _fireSuccess();
         }
       },
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         final url = navigationAction.request.url;
         if (url == null) return NavigationActionPolicy.ALLOW;
+
+        // Always allow iframe/subframe navigations
+        if (!navigationAction.isForMainFrame) {
+          return NavigationActionPolicy.ALLOW;
+        }
 
         final host = url.host.toLowerCase();
 
@@ -183,6 +259,7 @@ class _PremblyWebViewState extends State<PremblyWebView> {
             host.contains('myidentitypass') ||
             host.contains('identitypass') ||
             host.contains('sdk-view') ||
+            host.contains('cloudfront.net') ||
             host.isEmpty) {
           return NavigationActionPolicy.ALLOW;
         }

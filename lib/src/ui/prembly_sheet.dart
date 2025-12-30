@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prembly_kyc/src/models/prembly_error.dart';
-import 'package:prembly_kyc/src/models/prembly_response.dart';
+import 'package:prembly_kyc/prembly_kyc.dart';
 import 'package:prembly_kyc/src/models/prembly_sheet_result.dart';
 import 'package:prembly_kyc/src/ui/prembly_webview.dart';
 import 'package:prembly_kyc/src/utils/constants.dart';
@@ -10,18 +9,18 @@ import 'package:prembly_kyc/src/utils/constants.dart';
 /// Returns the result of the verification, or `null` if dismissed.
 Future<PremblySheetResult?> showPremblySheet({
   required BuildContext context,
-  required String widgetId,
+  required PremblyConfig config,
 }) {
   return Navigator.of(context, rootNavigator: true).push<PremblySheetResult>(
-    _PremblySheetRoute(widgetId: widgetId),
+    _PremblySheetRoute(config: config),
   );
 }
 
 /// Custom modal route for the Prembly sheet.
 class _PremblySheetRoute extends ModalRoute<PremblySheetResult> {
-  _PremblySheetRoute({required this.widgetId});
+  _PremblySheetRoute({required this.config});
 
-  final String widgetId;
+  final PremblyConfig config;
 
   @override
   Color? get barrierColor => Colors.black54;
@@ -51,7 +50,7 @@ class _PremblySheetRoute extends ModalRoute<PremblySheetResult> {
     Animation<double> secondaryAnimation,
   ) {
     return _PremblySheet(
-      widgetId: widgetId,
+      config: config,
       animation: animation,
     );
   }
@@ -70,11 +69,11 @@ class _PremblySheetRoute extends ModalRoute<PremblySheetResult> {
 /// The actual sheet widget.
 class _PremblySheet extends StatefulWidget {
   const _PremblySheet({
-    required this.widgetId,
+    required this.config,
     required this.animation,
   });
 
-  final String widgetId;
+  final PremblyConfig config;
   final Animation<double> animation;
 
   @override
@@ -132,8 +131,9 @@ class _PremblySheetState extends State<_PremblySheet> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuerySize = MediaQuery.sizeOf(context);
-    final screenHeight = mediaQuerySize.height;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final keyboardHeight = mediaQuery.viewInsets.bottom;
     final sheetHeight = screenHeight * sheetHeightFraction;
 
     return PopScope(
@@ -160,7 +160,7 @@ class _PremblySheetState extends State<_PremblySheet> {
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 0,
+                bottom: keyboardHeight,
                 height: sheetHeight,
                 child: SlideTransition(
                   position: _slideAnimation,
@@ -201,7 +201,7 @@ class _PremblySheetState extends State<_PremblySheet> {
             _buildHandle(),
             Expanded(
               child: PremblyWebView(
-                widgetId: widget.widgetId,
+                config: widget.config,
                 onSuccess: _handleSuccess,
                 onError: _handleError,
                 onCancelled: _handleCancelled,

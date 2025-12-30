@@ -1,11 +1,16 @@
+import 'dart:convert';
+
+import 'package:prembly_kyc/prembly_kyc.dart';
 import 'package:prembly_kyc/src/utils/constants.dart';
 
 /// Generates the HTML content for the Prembly KYC WebView.
 ///
 /// This creates a minimal HTML page that embeds the Prembly SDK view
 /// in an iframe and listens for postMessage events.
-String generatePremblyHtml(String widgetId) {
-  final sdkUrl = '$premblySdkViewBaseUrl/$widgetId';
+String generatePremblyHtml(PremblyConfig config) {
+  final metadataJson = config.metadata != null
+      ? jsonEncode(config.metadata)
+      : '{}';
 
   return '''
 <!DOCTYPE html>
@@ -26,12 +31,6 @@ String generatePremblyHtml(String widgetId) {
             height: 100%;
             overflow: hidden;
             background-color: #ffffff;
-        }
-        
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
         }
         
         #loader {
@@ -79,14 +78,8 @@ String generatePremblyHtml(String widgetId) {
         <div class="spinner"></div>
         <p class="loader-text">Loading verification...</p>
     </div>
-    
-    <iframe 
-        id="prembly-frame" 
-        src="$sdkUrl"
-        allow="camera; microphone; geolocation"
-        allowfullscreen
-    ></iframe>
 
+    <script src="$premblyWidgetSdkUrl"></script>
     <script>
         function sendToFlutter(type, data) {
             if (window.flutter_inappwebview) {
@@ -101,60 +94,45 @@ String generatePremblyHtml(String widgetId) {
             document.getElementById('loader').classList.add('hidden');
         }
         
-        // Listen for messages from the iframe
-        window.addEventListener('message', function(event) {
-            // Verify origin is from Prembly
-            if (!event.origin.includes('prembly') && !event.origin.includes('sdk-view')) {
+        function handleVerificationResult(response, rawData) {
+            console.log('Callback received:', JSON.stringify(response));
+            
+            if (response.status === 'success' || response.code === '00') {
+                sendToFlutter('success', response);
+            } else if (response.code === 'E02' || response.status === 'cancelled') {
+                sendToFlutter('cancelled', response);
+            } else {
+                sendToFlutter('error', response);
+            }
+        }
+        
+        function startVerification() {
+            if (typeof IdentityKYC === 'undefined') {
+                setTimeout(startVerification, 100);
                 return;
             }
             
-            var data = event.data;
-            
-            // Handle different message formats
-            if (typeof data === 'string') {
-                try {
-                    data = JSON.parse(data);
-                } catch (e) {
-                    // Not JSON, might be a simple string message
-                    sendToFlutter('message', { raw: data });
-                    return;
-                }
-            }
-            
-            if (!data) return;
-            
-            // Normalize the response
-            var status = data.status || '';
-            var code = data.code || '';
-            
-            if (status === 'success' || code === '00') {
-                sendToFlutter('success', data);
-            } else if (code === 'E02' || status === 'cancelled' || data.message === 'Verification Canceled') {
-                sendToFlutter('cancelled', data);
-            } else if (status === 'failed' || status === 'error' || code === 'E01') {
-                sendToFlutter('error', data);
-            } else {
-                // Unknown message, forward it anyway
-                sendToFlutter('message', data);
-            }
-        });
-        
-        // Handle iframe load
-        var iframe = document.getElementById('prembly-frame');
-        iframe.onload = function() {
             hideLoader();
-            sendToFlutter('loaded', { success: true });
-        };
-        
-        iframe.onerror = function(error) {
-            sendToFlutter('error', {
-                code: 'IFRAME_LOAD_ERROR',
-                message: 'Failed to load verification page'
+            
+            IdentityKYC.verify({
+                widget_id: '${config.widgetId}',
+                widget_key: '${config.widgetKey}',
+                first_name: '${config.firstName}',
+                last_name: '${config.lastName}',
+                email: '${config.email}',
+                ${config.phone != null ? "phone: '${config.phone}'," : ''}
+                metadata: $metadataJson,
+                callback: handleVerificationResult
             });
-        };
+        }
         
-        // Notify Flutter when page is ready
-        sendToFlutter('ready', { timestamp: Date.now() });
+        if (document.readyState === 'complete') {
+            setTimeout(startVerification, 100);
+        } else {
+            window.addEventListener('load', function() {
+                setTimeout(startVerification, 100);
+            });
+        }
     </script>
 </body>
 </html>

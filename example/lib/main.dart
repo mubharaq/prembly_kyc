@@ -48,12 +48,11 @@ class _MyHomePageState extends State<MyHomePage> {
       await PremblyKyc(
         config: const PremblyConfig(
           // Replace with your actual keys
-          merchantKey: 'sandbox_pk_xxxxxxxxxx',
+          widgetKey: 'wdgt_xxxxxxx',
           email: 'test@example.com',
           firstName: 'John',
           lastName: 'Doe',
-          userRef: 'test_user_001',
-          configId: 'example_configid',
+          widgetId: 'widgetid_xxxxxxx',
         ),
         onSuccess: (response) {
           setState(() {

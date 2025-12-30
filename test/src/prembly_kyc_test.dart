@@ -5,12 +5,11 @@ void main() {
   group('PremblyKyc', () {
     test('can be instantiated', () {
       const config = PremblyConfig(
-        merchantKey: 'key',
+        widgetKey: 'key',
         email: 'email',
         firstName: 'first',
         lastName: 'last',
-        userRef: 'ref',
-        configId: 'example',
+        widgetId: 'example',
       );
       expect(const PremblyKyc(config: config), isNotNull);
     });

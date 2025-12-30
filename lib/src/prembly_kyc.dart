@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:prembly_kyc/src/config/prembly_config.dart';
-import 'package:prembly_kyc/src/core/prembly_api_client.dart';
 import 'package:prembly_kyc/src/models/prembly_error.dart';
 import 'package:prembly_kyc/src/models/prembly_response.dart';
 import 'package:prembly_kyc/src/models/prembly_sheet_result.dart';
@@ -92,6 +91,8 @@ class PremblyKyc {
   Future<void> show(BuildContext context) async {
     // Check camera permission first
     final permissionResult = await PermissionHelper.requestCameraPermission();
+    final locationPermissionResult =
+        await PermissionHelper.requestLocationPermission();
 
     if (permissionResult is PermissionDenied) {
       onError?.call(permissionResult.error);
@@ -99,23 +100,18 @@ class PremblyKyc {
       return;
     }
 
-    // Initialize the widget
-    final initResult = await PremblyApiClient.initializeWidget(config);
-
-    if (initResult is InitializationFailure) {
-      onError?.call(initResult.error);
+    if (locationPermissionResult is PermissionDenied) {
+      onError?.call(locationPermissionResult.error);
       onClose?.call();
       return;
     }
-
-    final widgetId = (initResult as InitializationSuccess).widgetId;
 
     // Show the sheet
     if (!context.mounted) return;
 
     final result = await showPremblySheet(
       context: context,
-      widgetId: widgetId,
+      config: config,
     );
     // Handle result
     switch (result) {

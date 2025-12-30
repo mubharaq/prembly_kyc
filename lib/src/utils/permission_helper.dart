@@ -52,6 +52,29 @@ abstract final class PermissionHelper {
     );
   }
 
+  /// Requests location permission and returns the result.
+  ///
+  /// This method first checks the current permission status.
+  /// If not determined, it requests permission from the user.
+  /// Returns [PermissionGranted] if access is allowed, or
+  /// [PermissionDenied] with an appropriate error otherwise.
+  static Future<PermissionResult> requestLocationPermission() async {
+    var status = await Permission.location.status;
+
+    // If not determined yet, request permission
+    if (status.isDenied) {
+      status = await Permission.location.request();
+    }
+
+    if (status.isGranted || status.isLimited) {
+      return const PermissionGranted();
+    }
+
+    return PermissionDenied(
+      PremblyError.locationPermissionDenied(),
+    );
+  }
+
   /// Opens the app settings page.
   ///
   /// Useful when camera permission is permanently denied and the user
