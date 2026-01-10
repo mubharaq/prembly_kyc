@@ -53,6 +53,8 @@ Add the following to your `ios/Runner/Info.plist`:
 <string>Camera access is required for identity verification</string>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>This app may requires access to your location to complete verification</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Allow access to your phone's location for verification</string>
 ```
 
 ## Prerequisites
@@ -79,7 +81,6 @@ ElevatedButton(
         email: 'user@example.com',
         firstName: 'John',
         lastName: 'Doe',
-        userRef: 'unique_user_123',
       ),
       onSuccess: (response) {
         print('Verified via ${response.channel}');
@@ -133,7 +134,6 @@ PremblyKyc(
 | `email` | `String` | Yes | User's email address |
 | `firstName` | `String` | Yes | User's first name |
 | `lastName` | `String` | Yes | User's last name |
-| `userRef` | `String` | Yes | Unique reference for the user |
 | `metadata` | `Map<String, dynamic>?` | No | Additional data to include |
 
 ### PremblyResponse
@@ -178,44 +178,11 @@ enum PremblyErrorType {
 
 ## How It Works
 
-1. **Permission Check**: Requests camera permission if not already granted
-2. **Initialization**: Calls Prembly API to initialize the widget and get a `widget_id`
-3. **Display**: Shows a modal bottom sheet with the Prembly verification UI
-4. **Verification**: User completes the verification flow
-5. **Callback**: Returns the result via `onSuccess` or `onError` callbacks
+1. **Permission Check**: Requests camera and location permission if not already granted
+2. **Display**: Shows a modal bottom sheet with the Prembly verification UI
+3. **Verification**: User completes the verification flow
+4. **Callback**: Returns the result via `onSuccess` or `onError` callbacks
 
-## Handling Permission Errors
-
-When camera permission is permanently denied, you can direct users to settings:
-
-```dart
-import 'package:prembly_kyc/prembly_kyc.dart';
-
-onError: (error) {
-  if (error.type == PremblyErrorType.cameraPermissionPermanentlyDenied) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Camera Permission Required'),
-        content: Text('Please enable camera access in your device settings.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              openAppSettings(); // From permission_handler package
-            },
-            child: Text('Open Settings'),
-          ),
-        ],
-      ),
-    );
-  }
-},
-```
 
 ## Closing the Widget
 

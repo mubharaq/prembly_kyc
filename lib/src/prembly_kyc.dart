@@ -6,13 +6,13 @@ import 'package:prembly_kyc/src/models/prembly_sheet_result.dart';
 import 'package:prembly_kyc/src/ui/prembly_sheet.dart';
 import 'package:prembly_kyc/src/utils/permission_helper.dart';
 
-/// Callback for successful verification.
+///
 typedef PremblySuccessCallback = void Function(PremblyResponse response);
 
-/// Callback for verification errors.
+///
 typedef PremblyErrorCallback = void Function(PremblyError error);
 
-/// Callback for when the widget is closed.
+///
 typedef PremblyCloseCallback = void Function();
 
 /// Prembly KYC widget for identity verification.
@@ -83,7 +83,7 @@ class PremblyKyc {
   /// Shows the Prembly KYC verification widget.
   ///
   /// This method:
-  /// 1. Requests camera permission (if not already granted)
+  /// 1. Requests camera and location permission (if not already granted)
   /// 2. Shows the verification sheet
   /// 3. Handles the verification result
   ///

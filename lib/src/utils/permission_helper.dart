@@ -1,18 +1,18 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'package:prembly_kyc/src/models/prembly_error.dart';
 
-/// Result of a permission request.
+///
 sealed class PermissionResult {
   const PermissionResult();
 }
 
-/// Permission was granted.
+///
 class PermissionGranted extends PermissionResult {
   ///
   const PermissionGranted();
 }
 
-/// Permission was denied.
+///
 class PermissionDenied extends PermissionResult {
   ///
   const PermissionDenied(this.error);

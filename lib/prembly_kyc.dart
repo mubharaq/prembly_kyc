@@ -56,6 +56,8 @@
 /// <string>Camera access is required for identity verification</string>
 /// <key>NSLocationWhenInUseUsageDescription</key>
 /// <string>Location access is required for identity verification</string>
+/// <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+/// <string>Allow access to your phone's location for verification</string>
 /// ```
 library;
 

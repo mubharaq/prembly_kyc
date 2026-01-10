@@ -49,5 +49,7 @@
 	<string>This app requires access to your camera to complete verification</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app may requires access to your location to complete verification</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Allow access to your phone's location for verification</string>
 </dict>
 </plist>
