@@ -44,7 +44,6 @@ class PremblyWebView extends StatefulWidget {
 class _PremblyWebViewState extends State<PremblyWebView> {
   InAppWebViewController? _controller;
   bool _isDisposed = false;
-  bool _verificationPassed = false;
   bool _callbackFired = false;
 
   @override
@@ -73,10 +72,7 @@ class _PremblyWebViewState extends State<PremblyWebView> {
     _callbackFired = true;
 
     widget.onError(
-      PremblyError(
-        type: PremblyErrorType.verificationFailed,
-        message: message,
-      ),
+      PremblyError(type: PremblyErrorType.verificationFailed, message: message),
     );
   }
 
@@ -193,7 +189,7 @@ class _PremblyWebViewState extends State<PremblyWebView> {
         if (request.url.toString().contains('sessions/verify')) {
           widget.onError(
             PremblyError.verificationError(
-              'Verification Request Failed (${error.type}) - ${error.description}',
+              '''Verification Request Failed (${error.type}) - ${error.description}''',
             ),
           );
         }
@@ -219,13 +215,16 @@ class _PremblyWebViewState extends State<PremblyWebView> {
         // Everything below is a hack because prembly's sdk does not fire
         // callbacks
 
-        //Detect successful verification from SDK logs
+        // Detect successful verification from SDK logs.
+        // The "Done" button opens an external browser (window.open),
+        // so we fire success immediately here instead of waiting
+        // for a redirect that never reaches our WebView handlers.
         if (msg.contains('Selfie verification result: true') ||
             msg.contains('Verification completed successfully')) {
-          _verificationPassed = true;
           if (kDebugMode) {
-            print('PremblyKYC: Verification passed detected');
+            print('PremblyKYC: Verification passed detected → firing success');
           }
+          _fireSuccess();
         }
 
         // Detect failed verification
@@ -235,14 +234,6 @@ class _PremblyWebViewState extends State<PremblyWebView> {
             print('PremblyKYC: Verification failed detected');
           }
           _fireError('Verification failed');
-        }
-
-        // When verification passed and user clicks Done button
-        if (_verificationPassed && msg.contains('button_clicked')) {
-          if (kDebugMode) {
-            print('PremblyKYC: Done button clicked after success');
-          }
-          _fireSuccess();
         }
       },
       shouldOverrideUrlLoading: (controller, navigationAction) async {
@@ -265,8 +256,7 @@ class _PremblyWebViewState extends State<PremblyWebView> {
           return NavigationActionPolicy.ALLOW;
         }
 
-        // Navigation to external domain = close/callback from Prembly widget
-        // Parse query params to determine result
+        // Otherwise, try to parse result from query params
         final queryParams = url.queryParameters;
         final status = queryParams['status']?.toLowerCase();
         final code = queryParams['code'];
